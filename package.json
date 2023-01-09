@@ -5,6 +5,7 @@
   "author": "Star Lord",
   "license": "MIT",
   "dependencies": {
+    "googleapis": "^110.0.0",
     "tesseract.js": "^4.0.2"
   }
 }
