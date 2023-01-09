@@ -3,5 +3,8 @@
   "version": "0.1.0",
   "main": "./ts-output/main.js",
   "author": "Star Lord",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "tesseract.js": "^4.0.2"
+  }
 }
