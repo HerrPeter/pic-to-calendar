@@ -41,7 +41,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var tesseract_js_1 = __importDefault(require("tesseract.js"));
 var imageDir = process.argv.slice(2)[0] || __dirname + '/job.jpg';
-var imageData;
+var image;
 var imageLines;
 var getText = function (image) { return __awaiter(void 0, void 0, void 0, function () {
     var data;
@@ -57,14 +57,18 @@ var getText = function (image) { return __awaiter(void 0, void 0, void 0, functi
     });
 }); };
 var main = function () { return __awaiter(void 0, void 0, void 0, function () {
+    var info, time1;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
                 console.log('Extracting text from image (Please Wait) ...');
-                return [4 /*yield*/, getText(imageDir)];
+                info = 'MONDAY, JAN 9, 2023';
+                time1 = info.match(/\w{2,4}.\d{1,2},.\d{2,4}/);
+                console.log(time1);
+                return [2 /*return*/];
             case 1:
-                imageData = _a.sent();
-                imageLines = imageData.data.lines;
+                image = _a.sent();
+                imageLines = image.data.lines;
                 console.log('Image Dir: ' + imageDir);
                 console.log('Image Text:');
                 // let fourthCount = -1;
@@ -72,7 +76,7 @@ var main = function () { return __awaiter(void 0, void 0, void 0, function () {
                     console.log(line.text.replace('\n', ''));
                     // Note about number of lines for Disney Schedule...
                     // 6 lines for split shift
-                    // 4 lines for normal schedule
+                    // 3/4 lines for normal schedule
                     // 2 lines for RDO
                     // if (fourthCount % 3 == 0) {
                     // 	console.log('-- Next Date --');

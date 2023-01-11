@@ -1,7 +1,7 @@
 import Tesseract from 'tesseract.js';
 
 const imageDir: string = process.argv.slice(2)[0] || __dirname + '/job.jpg';
-let imageData: Tesseract.RecognizeResult;
+let image: Tesseract.RecognizeResult;
 let imageLines: Tesseract.Line[];
 
 const getText = async (image: string): Promise<Tesseract.RecognizeResult> => {
@@ -15,8 +15,14 @@ const getText = async (image: string): Promise<Tesseract.RecognizeResult> => {
 const main = async () => {
 	console.log('Extracting text from image (Please Wait) ...');
 
-	imageData = await getText(imageDir);
-	imageLines = imageData.data.lines;
+	let info = 'MONDAY, JAN 9, 2023';
+	let time1 = info.match(/\w{2,4}.\d{1,2},.\d{2,4}/);
+	console.log(time1);
+
+	return;
+
+	image = await getText(imageDir);
+	imageLines = image.data.lines;
 
 	console.log('Image Dir: ' + imageDir);
 	console.log('Image Text:');
@@ -27,7 +33,7 @@ const main = async () => {
 
 		// Note about number of lines for Disney Schedule...
 		// 6 lines for split shift
-		// 4 lines for normal schedule
+		// 3/4 lines for normal schedule
 		// 2 lines for RDO
 
 		// if (fourthCount % 3 == 0) {
