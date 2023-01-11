@@ -47,7 +47,7 @@ export default class Recognizer {
 		google.options({ auth: this.authClient });
 	};
 
-	getNextEvent = () => {
+	getNextEvent = (): Event[] | null | undefined => {
 		if (this.scheduleLines.length == 0) {
 			return null;
 		}
@@ -109,21 +109,61 @@ export default class Recognizer {
 					if (thirdLine) {
 						// Get summary
 						let summary = thirdLine.text;
-						return Recognizer.createNewEvent(
-							eventDate[0],
-							startTime[0],
-							endTime[0],
-							summary
-						);
+						return [
+							Recognizer.createNewEvent(
+								eventDate[0],
+								startTime[0],
+								endTime[0],
+								summary
+							),
+						];
 					}
 				} else return null; // Invalid (no end time).
 			}
-			// This is possible RDO/ADO+/Split Shift
+			// This is possible RDO/ADO+/Split Shift/Normal (4 lines)
 			else {
 				// Check 2 lines down to see if split shift or not
-				// let thirdLine =
+				let thirdLine = this.scheduleLines.shift();
+				if (thirdLine) {
+					// Get start time...
+					let startTime: RegExpMatchArray | null =
+						thirdLine.text.match(/\d{2}:\d{2}/);
 
-				return null; // Invalid (no start time).
+					// This is either a normal shift (4 lines) or split (4 or more lines)
+					if (startTime) {
+						// Get end time...
+						let continueIndex = startTime[0].length + (startTime.index || 0);
+						thirdLine.text = thirdLine.text.substring(continueIndex);
+						let endTime: RegExpMatchArray | null =
+							thirdLine.text.match(/\d{2}:\d{2}/);
+
+						// If has end time -> end time of Normal shift (3 lines)
+						if (endTime) {
+							// Get third line...
+							let fourthLine = this.scheduleLines.shift();
+
+							// Get summary for Normal shift (3 lines)
+							if (fourthLine) {
+								// Get summary
+								let summary = fourthLine.text;
+								let events: Event[] = [];
+								events.push(
+									Recognizer.createNewEvent(
+										eventDate[0],
+										startTime[0],
+										endTime[0],
+										summary
+									)
+								);
+
+								// Now check if there are more schedules (i.e. splits) until new date is reached/end of scheduleLines...
+
+								// Return all scheuldes as array.
+								return events;
+							} else return null; // Invalid (missing a summary).
+						} else return null; // Invalid (missing an end time).
+					} else return null; // Invalid (probably an ADO/RDO).
+				} else return null; // Invalid (no next line).
 			}
 		} else return null; // Invalid (no next line | probably a day off).
 		// 	} else return null; // Invalid (no date).

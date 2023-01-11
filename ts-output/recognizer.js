@@ -128,17 +128,52 @@ var Recognizer = /** @class */ (function () {
                         if (thirdLine) {
                             // Get summary
                             var summary = thirdLine.text;
-                            return Recognizer.createNewEvent(eventDate[0], startTime[0], endTime[0], summary);
+                            return [
+                                Recognizer.createNewEvent(eventDate[0], startTime[0], endTime[0], summary),
+                            ];
                         }
                     }
                     else
                         return null; // Invalid (no end time).
                 }
-                // This is possible RDO/ADO+/Split Shift
+                // This is possible RDO/ADO+/Split Shift/Normal (4 lines)
                 else {
                     // Check 2 lines down to see if split shift or not
-                    // let thirdLine =
-                    return null; // Invalid (no start time).
+                    var thirdLine = _this.scheduleLines.shift();
+                    if (thirdLine) {
+                        // Get start time...
+                        var startTime_1 = thirdLine.text.match(/\d{2}:\d{2}/);
+                        // This is either a normal shift (4 lines) or split (4 or more lines)
+                        if (startTime_1) {
+                            // Get end time...
+                            var continueIndex = startTime_1[0].length + (startTime_1.index || 0);
+                            thirdLine.text = thirdLine.text.substring(continueIndex);
+                            var endTime = thirdLine.text.match(/\d{2}:\d{2}/);
+                            // If has end time -> end time of Normal shift (3 lines)
+                            if (endTime) {
+                                // Get third line...
+                                var fourthLine = _this.scheduleLines.shift();
+                                // Get summary for Normal shift (3 lines)
+                                if (fourthLine) {
+                                    // Get summary
+                                    var summary = fourthLine.text;
+                                    var events = [];
+                                    events.push(Recognizer.createNewEvent(eventDate[0], startTime_1[0], endTime[0], summary));
+                                    // Now check if there are more schedules (i.e. splits) until new date is reached/end of scheduleLines...
+                                    // Return all scheuldes as array.
+                                    return events;
+                                }
+                                else
+                                    return null; // Invalid (missing a summary).
+                            }
+                            else
+                                return null; // Invalid (missing an end time).
+                        }
+                        else
+                            return null; // Invalid (probably an ADO/RDO).
+                    }
+                    else
+                        return null; // Invalid (no next line).
                 }
             }
             else
