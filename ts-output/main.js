@@ -58,7 +58,7 @@ var getText = function (image) { return __awaiter(void 0, void 0, void 0, functi
     });
 }); };
 var main = function () { return __awaiter(void 0, void 0, void 0, function () {
-    var myRec, event;
+    var myRec, events;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
@@ -72,9 +72,9 @@ var main = function () { return __awaiter(void 0, void 0, void 0, function () {
                 image = _a.sent();
                 imageLines = image.data.lines;
                 myRec = new recognizer_1.default(imageLines);
-                event = myRec.getNextEvent();
-                console.log('First event:');
-                console.log(event);
+                events = myRec.getAllEvents();
+                console.log('Events:');
+                console.log(events);
                 return [2 /*return*/];
         }
     });

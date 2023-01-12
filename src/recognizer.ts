@@ -47,9 +47,22 @@ export default class Recognizer {
 		google.options({ auth: this.authClient });
 	};
 
-	getNextEvent = (): Event[] | null | undefined => {
+	getAllEvents = (): Event[] => {
+		let allEvents: Event[] = [];
+
+		while (this.scheduleLines.length > 1) {
+			let events = this.getNextEvent();
+			events.forEach((event) => {
+				allEvents.push(event);
+			});
+		}
+
+		return allEvents;
+	};
+
+	getNextEvent = (): Event[] => {
 		if (this.scheduleLines.length == 0) {
-			return null;
+			return [];
 		}
 
 		// let lineNum = 0;
@@ -74,7 +87,7 @@ export default class Recognizer {
 		}
 
 		// If no date is found -> invalid input...
-		if (!eventDate) return null;
+		if (!eventDate) return [];
 
 		// Remove the lines that were trash...
 		while (counter > 0) {
@@ -82,11 +95,9 @@ export default class Recognizer {
 			counter--;
 		}
 
-		// if (Recognizer.strStartsWithSub(currLine.text, DaysOfWeek)) {
-		// 	// -- Line starts with a day of the week...
-		// 	// Get date from current line...
-		// 	let eventDate = currLine.text.match(/\w{2,4}.\d{1,2}/); // To add the year append: ",.\d{2,4}"
-		// 	if (eventDate) {
+		// Make currLine the date...
+		currLine = this.scheduleLines.shift();
+
 		// Get second line (has either a time or a week day)...
 		let secondLine = this.scheduleLines.shift();
 		if (secondLine) {
@@ -118,7 +129,10 @@ export default class Recognizer {
 							),
 						];
 					}
-				} else return null; // Invalid (no end time).
+				} else {
+					this.scheduleLines.unshift(secondLine);
+					return []; // Invalid (no end time).
+				}
 			}
 			// This is possible RDO/ADO+/Split Shift/Normal (4 lines)
 			else {
@@ -137,12 +151,12 @@ export default class Recognizer {
 						let endTime: RegExpMatchArray | null =
 							thirdLine.text.match(/\d{2}:\d{2}/);
 
-						// If has end time -> end time of Normal shift (3 lines)
+						// If has end time -> end time of Normal shift (4 lines)
 						if (endTime) {
 							// Get third line...
 							let fourthLine = this.scheduleLines.shift();
 
-							// Get summary for Normal shift (3 lines)
+							// Get summary for Normal shift (4 lines)
 							if (fourthLine) {
 								// Get summary
 								let summary = fourthLine.text;
@@ -166,46 +180,56 @@ export default class Recognizer {
 											// Get end time...
 											let continueIndex =
 												startTime[0].length + (startTime.index || 0);
-											thirdLine.text = thirdLine.text.substring(continueIndex);
-											let endTime: RegExpMatchArray | null =
-												thirdLine.text.match(/\d{2}:\d{2}/);
+											newLine.text = newLine.text.substring(continueIndex);
+											let newEndTime = newLine.text.match(/\d{2}:\d{2}/);
 
-											if (endTime) {
+											if (newEndTime) {
 												// Get third line...
-												let fourthLine = this.scheduleLines.shift();
+												let summaryLine = this.scheduleLines.shift();
 
 												// Get summary for Normal shift (3 lines)
-												if (fourthLine) {
+												if (summaryLine) {
 													// Get summary
-													let summary = fourthLine.text;
+													let summary = summaryLine.text;
 													events.push(
 														Recognizer.createNewEvent(
 															eventDate[0],
-															startTime[0],
-															endTime[0],
+															newStartTime[0],
+															newEndTime[0],
 															summary
 														)
 													);
 												} else break;
 											} else break;
-										} else break;
+										} else {
+											this.scheduleLines.unshift(newLine);
+											break;
+										}
 									} else break;
 								}
 
 								// Return all scheuldes as array.
 								return events;
-							} else return null; // Invalid (missing a summary).
-						} else return null; // Invalid (missing an end time).
-					} else return null; // Invalid (probably an ADO/RDO).
-				} else return null; // Invalid (no next line).
+							} else {
+								this.scheduleLines.unshift(thirdLine);
+								this.scheduleLines.unshift(secondLine);
+								return []; // Invalid (missing a summary).
+							}
+						} else {
+							this.scheduleLines.unshift(thirdLine);
+							this.scheduleLines.unshift(secondLine);
+							return []; // Invalid (missing an end time).
+						}
+					} else {
+						this.scheduleLines.unshift(thirdLine);
+						this.scheduleLines.unshift(secondLine);
+						return []; // Invalid (probably an ADO/RDO).
+					}
+				} else return []; // Invalid (no next line).
 			}
-		} else return null; // Invalid (no next line | probably a day off).
-		// 	} else return null; // Invalid (no date).
-		// }
-		// while (true){
-		// this.scheduleLines.forEach((line) => {
-		// });
-		// }
+		} else return []; // Invalid (no next line | probably a day off).
+
+		return [];
 	};
 
 	private static createNewEvent = (
@@ -223,7 +247,7 @@ export default class Recognizer {
 				date: date,
 				dateTime: endTime,
 			},
-			summary: summary,
+			summary: summary.replace('\n', ''),
 		};
 	};
 

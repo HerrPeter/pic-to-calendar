@@ -26,9 +26,10 @@ const main = async () => {
 	imageLines = image.data.lines;
 
 	let myRec = new Recognizer(imageLines);
-	let event = myRec.getNextEvent();
-	console.log('First event:');
-	console.log(event);
+
+	let events = myRec.getAllEvents();
+	console.log('Events:');
+	console.log(events);
 
 	return;
 

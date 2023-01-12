@@ -74,9 +74,19 @@ var Recognizer = /** @class */ (function () {
                 }
             });
         }); };
+        this.getAllEvents = function () {
+            var allEvents = [];
+            while (_this.scheduleLines.length > 1) {
+                var events = _this.getNextEvent();
+                events.forEach(function (event) {
+                    allEvents.push(event);
+                });
+            }
+            return allEvents;
+        };
         this.getNextEvent = function () {
             if (_this.scheduleLines.length == 0) {
-                return null;
+                return [];
             }
             // let lineNum = 0;
             var currLine = _this.scheduleLines.shift();
@@ -98,17 +108,14 @@ var Recognizer = /** @class */ (function () {
             }
             // If no date is found -> invalid input...
             if (!eventDate)
-                return null;
+                return [];
             // Remove the lines that were trash...
             while (counter > 0) {
                 _this.scheduleLines.shift();
                 counter--;
             }
-            // if (Recognizer.strStartsWithSub(currLine.text, DaysOfWeek)) {
-            // 	// -- Line starts with a day of the week...
-            // 	// Get date from current line...
-            // 	let eventDate = currLine.text.match(/\w{2,4}.\d{1,2}/); // To add the year append: ",.\d{2,4}"
-            // 	if (eventDate) {
+            // Make currLine the date...
+            currLine = _this.scheduleLines.shift();
             // Get second line (has either a time or a week day)...
             var secondLine = _this.scheduleLines.shift();
             if (secondLine) {
@@ -133,8 +140,10 @@ var Recognizer = /** @class */ (function () {
                             ];
                         }
                     }
-                    else
-                        return null; // Invalid (no end time).
+                    else {
+                        _this.scheduleLines.unshift(secondLine);
+                        return []; // Invalid (no end time).
+                    }
                 }
                 // This is possible RDO/ADO+/Split Shift/Normal (4 lines)
                 else {
@@ -149,11 +158,11 @@ var Recognizer = /** @class */ (function () {
                             var continueIndex = startTime_1[0].length + (startTime_1.index || 0);
                             thirdLine.text = thirdLine.text.substring(continueIndex);
                             var endTime = thirdLine.text.match(/\d{2}:\d{2}/);
-                            // If has end time -> end time of Normal shift (3 lines)
+                            // If has end time -> end time of Normal shift (4 lines)
                             if (endTime) {
                                 // Get third line...
                                 var fourthLine = _this.scheduleLines.shift();
-                                // Get summary for Normal shift (3 lines)
+                                // Get summary for Normal shift (4 lines)
                                 if (fourthLine) {
                                     // Get summary
                                     var summary = fourthLine.text;
@@ -168,16 +177,16 @@ var Recognizer = /** @class */ (function () {
                                             if (newStartTime) {
                                                 // Get end time...
                                                 var continueIndex_1 = startTime_1[0].length + (startTime_1.index || 0);
-                                                thirdLine.text = thirdLine.text.substring(continueIndex_1);
-                                                var endTime_1 = thirdLine.text.match(/\d{2}:\d{2}/);
-                                                if (endTime_1) {
+                                                newLine.text = newLine.text.substring(continueIndex_1);
+                                                var newEndTime = newLine.text.match(/\d{2}:\d{2}/);
+                                                if (newEndTime) {
                                                     // Get third line...
-                                                    var fourthLine_1 = _this.scheduleLines.shift();
+                                                    var summaryLine = _this.scheduleLines.shift();
                                                     // Get summary for Normal shift (3 lines)
-                                                    if (fourthLine_1) {
+                                                    if (summaryLine) {
                                                         // Get summary
-                                                        var summary_1 = fourthLine_1.text;
-                                                        events.push(Recognizer.createNewEvent(eventDate[0], startTime_1[0], endTime_1[0], summary_1));
+                                                        var summary_1 = summaryLine.text;
+                                                        events.push(Recognizer.createNewEvent(eventDate[0], newStartTime[0], newEndTime[0], summary_1));
                                                     }
                                                     else
                                                         break;
@@ -185,8 +194,10 @@ var Recognizer = /** @class */ (function () {
                                                 else
                                                     break;
                                             }
-                                            else
+                                            else {
+                                                _this.scheduleLines.unshift(newLine);
                                                 break;
+                                            }
                                         }
                                         else
                                             break;
@@ -194,27 +205,31 @@ var Recognizer = /** @class */ (function () {
                                     // Return all scheuldes as array.
                                     return events;
                                 }
-                                else
-                                    return null; // Invalid (missing a summary).
+                                else {
+                                    _this.scheduleLines.unshift(thirdLine);
+                                    _this.scheduleLines.unshift(secondLine);
+                                    return []; // Invalid (missing a summary).
+                                }
                             }
-                            else
-                                return null; // Invalid (missing an end time).
+                            else {
+                                _this.scheduleLines.unshift(thirdLine);
+                                _this.scheduleLines.unshift(secondLine);
+                                return []; // Invalid (missing an end time).
+                            }
                         }
-                        else
-                            return null; // Invalid (probably an ADO/RDO).
+                        else {
+                            _this.scheduleLines.unshift(thirdLine);
+                            _this.scheduleLines.unshift(secondLine);
+                            return []; // Invalid (probably an ADO/RDO).
+                        }
                     }
                     else
-                        return null; // Invalid (no next line).
+                        return []; // Invalid (no next line).
                 }
             }
             else
-                return null; // Invalid (no next line | probably a day off).
-            // 	} else return null; // Invalid (no date).
-            // }
-            // while (true){
-            // this.scheduleLines.forEach((line) => {
-            // });
-            // }
+                return []; // Invalid (no next line | probably a day off).
+            return [];
         };
         this.addToCalendar = function (event) { return __awaiter(_this, void 0, void 0, function () {
             var res;
@@ -288,7 +303,7 @@ var Recognizer = /** @class */ (function () {
                 date: date,
                 dateTime: endTime,
             },
-            summary: summary,
+            summary: summary.replace('\n', ''),
         };
     };
     /**
