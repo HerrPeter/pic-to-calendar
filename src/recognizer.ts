@@ -59,7 +59,7 @@ export default class Recognizer {
 
 		// Find line that has a valid date (but is not the week descriptor date at top of schedule)...
 		for (let i = 0; i < this.scheduleLines.length; i++) {
-			// if (currLine) {
+			// Check line if it has a date...
 			eventDate = this.scheduleLines[i].text.match(/\w{2,4}.\d{1,2}/);
 			if (eventDate) {
 				let weekDesc = this.scheduleLines[i].text.match(/\w{2,4}.\d{1,2}.-/); // NEEDS TESTING!!!
@@ -157,6 +157,40 @@ export default class Recognizer {
 								);
 
 								// Now check if there are more schedules (i.e. splits) until new date is reached/end of scheduleLines...
+								// Check line if it has a date...
+								while (true) {
+									let newLine = this.scheduleLines.shift();
+									if (newLine) {
+										let newStartTime = newLine.text.match(/\d{2}:\d{2}/);
+										if (newStartTime) {
+											// Get end time...
+											let continueIndex =
+												startTime[0].length + (startTime.index || 0);
+											thirdLine.text = thirdLine.text.substring(continueIndex);
+											let endTime: RegExpMatchArray | null =
+												thirdLine.text.match(/\d{2}:\d{2}/);
+
+											if (endTime) {
+												// Get third line...
+												let fourthLine = this.scheduleLines.shift();
+
+												// Get summary for Normal shift (3 lines)
+												if (fourthLine) {
+													// Get summary
+													let summary = fourthLine.text;
+													events.push(
+														Recognizer.createNewEvent(
+															eventDate[0],
+															startTime[0],
+															endTime[0],
+															summary
+														)
+													);
+												} else break;
+											} else break;
+										} else break;
+									} else break;
+								}
 
 								// Return all scheuldes as array.
 								return events;

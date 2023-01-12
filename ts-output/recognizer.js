@@ -84,7 +84,7 @@ var Recognizer = /** @class */ (function () {
             var counter = 0;
             // Find line that has a valid date (but is not the week descriptor date at top of schedule)...
             for (var i = 0; i < _this.scheduleLines.length; i++) {
-                // if (currLine) {
+                // Check line if it has a date...
                 eventDate = _this.scheduleLines[i].text.match(/\w{2,4}.\d{1,2}/);
                 if (eventDate) {
                     var weekDesc = _this.scheduleLines[i].text.match(/\w{2,4}.\d{1,2}.-/); // NEEDS TESTING!!!
@@ -160,6 +160,37 @@ var Recognizer = /** @class */ (function () {
                                     var events = [];
                                     events.push(Recognizer.createNewEvent(eventDate[0], startTime_1[0], endTime[0], summary));
                                     // Now check if there are more schedules (i.e. splits) until new date is reached/end of scheduleLines...
+                                    // Check line if it has a date...
+                                    while (true) {
+                                        var newLine = _this.scheduleLines.shift();
+                                        if (newLine) {
+                                            var newStartTime = newLine.text.match(/\d{2}:\d{2}/);
+                                            if (newStartTime) {
+                                                // Get end time...
+                                                var continueIndex_1 = startTime_1[0].length + (startTime_1.index || 0);
+                                                thirdLine.text = thirdLine.text.substring(continueIndex_1);
+                                                var endTime_1 = thirdLine.text.match(/\d{2}:\d{2}/);
+                                                if (endTime_1) {
+                                                    // Get third line...
+                                                    var fourthLine_1 = _this.scheduleLines.shift();
+                                                    // Get summary for Normal shift (3 lines)
+                                                    if (fourthLine_1) {
+                                                        // Get summary
+                                                        var summary_1 = fourthLine_1.text;
+                                                        events.push(Recognizer.createNewEvent(eventDate[0], startTime_1[0], endTime_1[0], summary_1));
+                                                    }
+                                                    else
+                                                        break;
+                                                }
+                                                else
+                                                    break;
+                                            }
+                                            else
+                                                break;
+                                        }
+                                        else
+                                            break;
+                                    }
                                     // Return all scheuldes as array.
                                     return events;
                                 }

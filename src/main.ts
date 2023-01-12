@@ -1,4 +1,5 @@
 import Tesseract from 'tesseract.js';
+import Recognizer from './recognizer';
 
 const imageDir: string = process.argv.slice(2)[0] || __dirname + '/job.jpg';
 let image: Tesseract.RecognizeResult;
@@ -15,14 +16,21 @@ const getText = async (image: string): Promise<Tesseract.RecognizeResult> => {
 const main = async () => {
 	console.log('Extracting text from image (Please Wait) ...');
 
-	let info = 'MONDAY, JAN 9, 2023';
-	let time1 = info.match(/\w{2,4}.\d{1,2},.\d{2,4}/);
-	console.log(time1);
+	// let info = 'Jan 13, 2023 ©';
+	// let time1 = info.match(/\w{2,4}.\d{1,2}.-/); //match(/\w{2,4}.\d{1,2},.\d{2,4}/);
+	// console.log(time1);
 
-	return;
+	// return;
 
 	image = await getText(imageDir);
 	imageLines = image.data.lines;
+
+	let myRec = new Recognizer(imageLines);
+	let event = myRec.getNextEvent();
+	console.log('First event:');
+	console.log(event);
+
+	return;
 
 	console.log('Image Dir: ' + imageDir);
 	console.log('Image Text:');
