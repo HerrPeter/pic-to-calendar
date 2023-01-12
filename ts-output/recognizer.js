@@ -89,7 +89,7 @@ var Recognizer = /** @class */ (function () {
                 return [];
             }
             // let lineNum = 0;
-            var currLine = _this.scheduleLines.shift();
+            var currLine; //= this.scheduleLines.shift();
             var eventDate;
             var counter = 0;
             // Find line that has a valid date (but is not the week descriptor date at top of schedule)...
@@ -294,14 +294,19 @@ var Recognizer = /** @class */ (function () {
         this.scheduleLines = textLines;
     }
     Recognizer.createNewEvent = function (date, startTime, endTime, summary) {
+        var currYear = new Date().getFullYear();
+        var startDate = new Date(date + ' ' + currYear + ' ' + startTime);
+        var endDate = new Date(date + ' ' + currYear + ' ' + endTime);
+        // If overnight shift, add 1 to the date...
+        if (endTime < startTime) {
+            endDate.setDate(endDate.getDate() + 1);
+        }
         return {
             start: {
-                date: date,
-                dateTime: startTime,
+                dateTime: startDate,
             },
             end: {
-                date: date,
-                dateTime: endTime,
+                dateTime: endDate,
             },
             summary: summary.replace('\n', ''),
         };

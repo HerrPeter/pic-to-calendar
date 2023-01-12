@@ -15,12 +15,12 @@ const DaysOfWeek = [
 interface Event {
 	summary?: string | null;
 	start?: {
-		date: string | Date | null;
-		dateTime: string | null;
+		date?: string | Date;
+		dateTime: string | Date;
 	};
 	end?: {
-		date: string | Date | null;
-		dateTime: string | null;
+		date?: string | Date;
+		dateTime: string | Date;
 	};
 }
 
@@ -66,7 +66,7 @@ export default class Recognizer {
 		}
 
 		// let lineNum = 0;
-		let currLine = this.scheduleLines.shift();
+		let currLine; //= this.scheduleLines.shift();
 		let eventDate;
 		let counter = 0;
 
@@ -233,19 +233,26 @@ export default class Recognizer {
 	};
 
 	private static createNewEvent = (
-		date: string | Date | null,
+		date: string,
 		startTime: string,
 		endTime: string,
 		summary: string
 	): Event => {
+		let currYear = new Date().getFullYear();
+		let startDate = new Date(date + ' ' + currYear + ' ' + startTime);
+		let endDate = new Date(date + ' ' + currYear + ' ' + endTime);
+
+		// If overnight shift, add 1 to the date...
+		if (endTime < startTime) {
+			endDate.setDate(endDate.getDate() + 1);
+		}
+
 		return {
 			start: {
-				date: date,
-				dateTime: startTime,
+				dateTime: startDate,
 			},
 			end: {
-				date: date,
-				dateTime: endTime,
+				dateTime: endDate,
 			},
 			summary: summary.replace('\n', ''),
 		};

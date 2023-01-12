@@ -65,10 +65,6 @@ var main = function () { return __awaiter(void 0, void 0, void 0, function () {
                 console.log('Extracting text from image (Please Wait) ...');
                 return [4 /*yield*/, getText(imageDir)];
             case 1:
-                // let info = 'Jan 13, 2023 ©';
-                // let time1 = info.match(/\w{2,4}.\d{1,2}.-/); //match(/\w{2,4}.\d{1,2},.\d{2,4}/);
-                // console.log(time1);
-                // return;
                 image = _a.sent();
                 imageLines = image.data.lines;
                 myRec = new recognizer_1.default(imageLines);

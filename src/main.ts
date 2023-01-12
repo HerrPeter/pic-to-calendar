@@ -16,17 +16,10 @@ const getText = async (image: string): Promise<Tesseract.RecognizeResult> => {
 const main = async () => {
 	console.log('Extracting text from image (Please Wait) ...');
 
-	// let info = 'Jan 13, 2023 ©';
-	// let time1 = info.match(/\w{2,4}.\d{1,2}.-/); //match(/\w{2,4}.\d{1,2},.\d{2,4}/);
-	// console.log(time1);
-
-	// return;
-
 	image = await getText(imageDir);
 	imageLines = image.data.lines;
 
 	let myRec = new Recognizer(imageLines);
-
 	let events = myRec.getAllEvents();
 	console.log('Events:');
 	console.log(events);
