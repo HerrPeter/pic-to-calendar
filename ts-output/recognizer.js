@@ -37,45 +37,48 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var googleapis_1 = require("googleapis");
-var DaysOfWeek = [
-    'M0NDAY',
-    'monday',
-    'tuesday',
-    'wednesday',
-    'thursday',
-    'friday',
-    'saturday',
-    'sunday',
-];
+var CLIENT_ID = '647262258664-22jl8e63pvorqjh9mfq556omhgq2ag0p.apps.googleusercontent.com';
+var CLIENT_SECRET = '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';
+var API_KEY = 'AIzaSyBjSVW6jIDSujoHZC-b6ZQ5wrFdY8naVf0';
 var Recognizer = /** @class */ (function () {
     function Recognizer(textLines) {
         var _this = this;
         this.selectedCalendar = '';
         this.authorize = function () { return __awaiter(_this, void 0, void 0, function () {
-            var auth, _a;
+            var authClient, scopes, auth, _a;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
+                        authClient = new googleapis_1.google.auth.OAuth2(CLIENT_ID, CLIENT_SECRET);
+                        scopes = [
+                            'https://www.googleapis.com/auth/calendar',
+                            'https://www.googleapis.com/auth/calendar.events',
+                        ];
                         auth = new googleapis_1.google.auth.GoogleAuth({
+                            clientOptions: {
+                                clientId: CLIENT_ID,
+                                clientSecret: CLIENT_SECRET,
+                            },
                             // Scopes can be specified either as an array or as a single, space-delimited string.
                             scopes: [
                                 'https://www.googleapis.com/auth/calendar',
                                 'https://www.googleapis.com/auth/calendar.events',
                             ],
                         });
-                        // Acquire an auth client, and bind it to all future calls
+                        // // Acquire an auth client, and bind it to all future calls
                         _a = this;
                         return [4 /*yield*/, auth.getClient()];
                     case 1:
-                        // Acquire an auth client, and bind it to all future calls
+                        // // Acquire an auth client, and bind it to all future calls
                         _a.authClient = _b.sent();
-                        googleapis_1.google.options({ auth: this.authClient });
                         return [2 /*return*/];
                 }
             });
         }); };
         this.getAllEvents = function () {
             var allEvents = [];
+            if (!_this.scheduleLines)
+                return allEvents;
             while (_this.scheduleLines.length > 1) {
                 var events = _this.getNextEvent();
                 events.forEach(function (event) {

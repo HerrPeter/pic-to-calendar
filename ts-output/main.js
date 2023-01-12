@@ -62,6 +62,9 @@ var main = function () { return __awaiter(void 0, void 0, void 0, function () {
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
+                // console.log('Authenticating...');
+                // myRec.authorize();
+                // return;
                 console.log('Extracting text from image (Please Wait) ...');
                 return [4 /*yield*/, getText(imageDir)];
             case 1:

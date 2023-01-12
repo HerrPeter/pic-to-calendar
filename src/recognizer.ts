@@ -1,16 +1,10 @@
 import Tesseract from 'tesseract.js';
 import { calendar_v3, google } from 'googleapis';
 
-const DaysOfWeek = [
-	'M0NDAY',
-	'monday',
-	'tuesday',
-	'wednesday',
-	'thursday',
-	'friday',
-	'saturday',
-	'sunday',
-];
+const CLIENT_ID =
+	'647262258664-22jl8e63pvorqjh9mfq556omhgq2ag0p.apps.googleusercontent.com';
+const CLIENT_SECRET = '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';
+const API_KEY = 'AIzaSyBjSVW6jIDSujoHZC-b6ZQ5wrFdY8naVf0';
 
 interface Event {
 	summary?: string | null;
@@ -34,7 +28,18 @@ export default class Recognizer {
 	}
 
 	authorize = async () => {
+		let authClient = new google.auth.OAuth2(CLIENT_ID, CLIENT_SECRET);
+
+		let scopes = [
+			'https://www.googleapis.com/auth/calendar',
+			'https://www.googleapis.com/auth/calendar.events',
+		];
+
 		const auth = new google.auth.GoogleAuth({
+			clientOptions: {
+				clientId: CLIENT_ID,
+				clientSecret: CLIENT_SECRET,
+			},
 			// Scopes can be specified either as an array or as a single, space-delimited string.
 			scopes: [
 				'https://www.googleapis.com/auth/calendar',
@@ -42,13 +47,14 @@ export default class Recognizer {
 			],
 		});
 
-		// Acquire an auth client, and bind it to all future calls
+		// // Acquire an auth client, and bind it to all future calls
 		this.authClient = await auth.getClient();
-		google.options({ auth: this.authClient });
+		// google.options({ auth: this.authClient });
 	};
 
 	getAllEvents = (): Event[] => {
 		let allEvents: Event[] = [];
+		if (!this.scheduleLines) return allEvents;
 
 		while (this.scheduleLines.length > 1) {
 			let events = this.getNextEvent();
