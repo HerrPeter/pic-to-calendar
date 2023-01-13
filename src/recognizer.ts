@@ -76,7 +76,6 @@ export default class Recognizer {
 
 		let currLine;
 		let eventDate;
-		let counter = 0;
 
 		// Find line that has a valid date (but is not the week descriptor date at top of schedule)...
 		for (let i = 0; i < this.scheduleLines.length; i++) {
@@ -100,18 +99,10 @@ export default class Recognizer {
 				this.scheduleLines.shift(); // Remove the useless non-date line (date must be first)
 				i--;
 			}
-
-			counter++;
 		}
 
 		// If no date is found -> invalid input...
 		if (!eventDate) return [];
-
-		// Remove the lines that were trash...
-		// while (counter > 0) {
-		// 	this.scheduleLines.shift();
-		// 	counter--;
-		// }
 
 		// Make currLine the date...
 		currLine = this.scheduleLines.shift();
@@ -256,6 +247,9 @@ export default class Recognizer {
 		endTime: string,
 		summary: string
 	): Event => {
+		// Remove invalid characters...
+		date = date.replace(/[^a-zA-Z\d ]/, ' ');
+
 		let currYear = new Date().getFullYear();
 		let startDate = new Date(date + ' ' + currYear + ' ' + startTime);
 		let endDate = new Date(date + ' ' + currYear + ' ' + endTime);
@@ -344,14 +338,6 @@ export default class Recognizer {
 		console.log(res.data);
 	};
 
-	NEW_createIcsFile = (events: Event[]) => {
-		let cal = new ICS.VCALENDAR();
-
-		let event = new ICS.VEVENT();
-		event.addProp('');
-		return;
-	};
-
 	createIcsFile = async (events: Event[]) => {
 		if (!events) return null;
 
@@ -366,7 +352,6 @@ export default class Recognizer {
 					event.start.dateTime.getHours(),
 					event.start.dateTime.getMinutes(),
 				],
-				// duration: {hours: 2, minutes: 30},
 				title: event.summary || 'No Title',
 				end: [
 					event.end.dateTime.getFullYear(),
@@ -374,6 +359,25 @@ export default class Recognizer {
 					event.end.dateTime.getDate(),
 					event.end.dateTime.getHours(),
 					event.end.dateTime.getMinutes(),
+				],
+				alarms: [
+					{
+						action: 'audio',
+						description: 'Reminder: ' + event.summary || '',
+						trigger: {
+							hours: 2,
+							before: true,
+						},
+					},
+					{
+						action: 'display',
+						description: 'Reminder 2: ' + event.summary || '',
+						trigger: {
+							hours: 1,
+							minutes: 30,
+							before: true,
+						},
+					},
 				],
 			};
 

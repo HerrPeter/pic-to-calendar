@@ -1,7 +1,7 @@
 import Tesseract from 'tesseract.js';
 import Recognizer from './recognizer';
 
-const imageDir: string = process.argv.slice(2)[0] || __dirname + '/NEW_job_VIEW.jpg';
+const imageDir: string = process.argv.slice(2)[0] || __dirname + '/NEW_job.jpg';
 let image: Tesseract.RecognizeResult;
 let imageLines: Tesseract.Line[];
 
@@ -16,6 +16,12 @@ const getText = async (image: string): Promise<Tesseract.RecognizeResult> => {
 const main = async () => {
 	// console.log('Authenticating...');
 	// myRec.authorize();
+	// return;
+
+	// let t = 'jan 20’ 2023';
+	// let newD = t.replace(/[^a-zA-Z\d ]/, '');
+	// let dt = new Date(newD);
+	// console.log(dt);
 	// return;
 
 	// let testStuff = '@ 10:30 to 15:30\n';

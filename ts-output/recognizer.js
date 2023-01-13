@@ -57,7 +57,6 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var googleapis_1 = require("googleapis");
 var ics = __importStar(require("../node_modules/ics"));
-var ICS = __importStar(require("ics-js"));
 var fs_1 = require("fs");
 var CLIENT_ID = '647262258664-22jl8e63pvorqjh9mfq556omhgq2ag0p.apps.googleusercontent.com';
 var CLIENT_SECRET = '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';
@@ -115,7 +114,6 @@ var Recognizer = /** @class */ (function () {
             }
             var currLine;
             var eventDate;
-            var counter = 0;
             // Find line that has a valid date (but is not the week descriptor date at top of schedule)...
             for (var i = 0; i < _this.scheduleLines.length; i++) {
                 // Check line if it has a date...
@@ -140,16 +138,10 @@ var Recognizer = /** @class */ (function () {
                     _this.scheduleLines.shift(); // Remove the useless non-date line (date must be first)
                     i--;
                 }
-                counter++;
             }
             // If no date is found -> invalid input...
             if (!eventDate)
                 return [];
-            // Remove the lines that were trash...
-            // while (counter > 0) {
-            // 	this.scheduleLines.shift();
-            // 	counter--;
-            // }
             // Make currLine the date...
             currLine = _this.scheduleLines.shift();
             // Get second line (has either a time or a week day)...
@@ -327,12 +319,6 @@ var Recognizer = /** @class */ (function () {
                 }
             });
         }); };
-        this.NEW_createIcsFile = function (events) {
-            var cal = new ICS.VCALENDAR();
-            var event = new ICS.VEVENT();
-            event.addProp('');
-            return;
-        };
         this.createIcsFile = function (events) { return __awaiter(_this, void 0, void 0, function () {
             var icsEvents;
             return __generator(this, function (_a) {
@@ -348,7 +334,6 @@ var Recognizer = /** @class */ (function () {
                             event.start.dateTime.getHours(),
                             event.start.dateTime.getMinutes(),
                         ],
-                        // duration: {hours: 2, minutes: 30},
                         title: event.summary || 'No Title',
                         end: [
                             event.end.dateTime.getFullYear(),
@@ -356,6 +341,25 @@ var Recognizer = /** @class */ (function () {
                             event.end.dateTime.getDate(),
                             event.end.dateTime.getHours(),
                             event.end.dateTime.getMinutes(),
+                        ],
+                        alarms: [
+                            {
+                                action: 'audio',
+                                description: 'Reminder: ' + event.summary || '',
+                                trigger: {
+                                    hours: 2,
+                                    before: true,
+                                },
+                            },
+                            {
+                                action: 'display',
+                                description: 'Reminder 2: ' + event.summary || '',
+                                trigger: {
+                                    hours: 1,
+                                    minutes: 30,
+                                    before: true,
+                                },
+                            },
                         ],
                     };
                     icsEvents.push(icsEvent);
@@ -377,6 +381,8 @@ var Recognizer = /** @class */ (function () {
         this.scheduleLines = textLines;
     }
     Recognizer.createNewEvent = function (date, startTime, endTime, summary) {
+        // Remove invalid characters...
+        date = date.replace(/[^a-zA-Z\d ]/, ' ');
         var currYear = new Date().getFullYear();
         var startDate = new Date(date + ' ' + currYear + ' ' + startTime);
         var endDate = new Date(date + ' ' + currYear + ' ' + endTime);
