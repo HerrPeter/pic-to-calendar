@@ -40,7 +40,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var recognizer_1 = __importDefault(require("./recognizer"));
-var imageDir = process.argv.slice(2)[0] || __dirname + '/job.jpg';
+var imageDir = process.argv.slice(2)[0] || __dirname + '/job_VIEW.jpg';
 var image;
 var imageLines;
 var main = function () { return __awaiter(void 0, void 0, void 0, function () {
