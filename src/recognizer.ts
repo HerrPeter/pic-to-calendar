@@ -74,7 +74,6 @@ export default class Recognizer {
 			return [];
 		}
 
-		let currLine;
 		let eventDate;
 
 		// Find line that has a valid date (but is not the week descriptor date at top of schedule)...
@@ -89,7 +88,6 @@ export default class Recognizer {
 					.match(/[a-z]{2,9}.\d{1,2}.+-/);
 				if (!weekDesc) {
 					// Successful date found, proceed...
-					currLine = this.scheduleLines[i];
 					break;
 				} else {
 					this.scheduleLines.shift(); // Remove the useless week description
@@ -104,8 +102,8 @@ export default class Recognizer {
 		// If no date is found -> invalid input...
 		if (!eventDate) return [];
 
-		// Make currLine the date...
-		currLine = this.scheduleLines.shift();
+		// Remove the date line...
+		this.scheduleLines.shift();
 
 		// Get second line (has either a time or a week day)...
 		let secondLine = this.scheduleLines.shift();
