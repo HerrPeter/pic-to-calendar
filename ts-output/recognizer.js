@@ -113,21 +113,32 @@ var Recognizer = /** @class */ (function () {
             if (_this.scheduleLines.length == 0) {
                 return [];
             }
-            // let lineNum = 0;
-            var currLine; //= this.scheduleLines.shift();
+            var currLine;
             var eventDate;
             var counter = 0;
             // Find line that has a valid date (but is not the week descriptor date at top of schedule)...
             for (var i = 0; i < _this.scheduleLines.length; i++) {
                 // Check line if it has a date...
-                eventDate = _this.scheduleLines[i].text.match(/\w{2,4}.\d{1,2}/);
+                eventDate = _this.scheduleLines[i].text
+                    .toLowerCase()
+                    .match(/[a-z]{2,9}.\d{1,2}.+20\d{1,2}/); // NOTE: Consider using (([a-zA-Z]{2,9}){1}(\w*\s*)*){1}\d{1,2} to include anyting inbetween the month and date (then remove the middle portion)
                 if (eventDate) {
-                    var weekDesc = _this.scheduleLines[i].text.match(/\w{2,4}.\d{1,2}.-/); // NEEDS TESTING!!!
+                    var weekDesc = _this.scheduleLines[i].text
+                        .toLowerCase()
+                        .match(/[a-z]{2,9}.\d{1,2}.+-/);
                     if (!weekDesc) {
                         // Successful date found, proceed...
                         currLine = _this.scheduleLines[i];
                         break;
                     }
+                    else {
+                        _this.scheduleLines.shift(); // Remove the useless week description
+                        i--;
+                    }
+                }
+                else {
+                    _this.scheduleLines.shift(); // Remove the useless non-date line (date must be first)
+                    i--;
                 }
                 counter++;
             }
@@ -135,10 +146,10 @@ var Recognizer = /** @class */ (function () {
             if (!eventDate)
                 return [];
             // Remove the lines that were trash...
-            while (counter > 0) {
-                _this.scheduleLines.shift();
-                counter--;
-            }
+            // while (counter > 0) {
+            // 	this.scheduleLines.shift();
+            // 	counter--;
+            // }
             // Make currLine the date...
             currLine = _this.scheduleLines.shift();
             // Get second line (has either a time or a week day)...

@@ -41,7 +41,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var tesseract_js_1 = __importDefault(require("tesseract.js"));
 var recognizer_1 = __importDefault(require("./recognizer"));
-var imageDir = process.argv.slice(2)[0] || __dirname + '/job.jpg';
+var imageDir = process.argv.slice(2)[0] || __dirname + '/NEW_job_VIEW.jpg';
 var image;
 var imageLines;
 var getText = function (image) { return __awaiter(void 0, void 0, void 0, function () {
@@ -64,6 +64,10 @@ var main = function () { return __awaiter(void 0, void 0, void 0, function () {
             case 0:
                 // console.log('Authenticating...');
                 // myRec.authorize();
+                // return;
+                // let testStuff = '@ 10:30 to 15:30\n';
+                // let regEx = testStuff.match(/\w{3,4}.\d{1,2}/);
+                // console.log(regEx);
                 // return;
                 console.log('Extracting text from image (Please Wait) ...');
                 return [4 /*yield*/, getText(imageDir)];

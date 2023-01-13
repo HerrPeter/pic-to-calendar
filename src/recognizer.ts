@@ -74,22 +74,31 @@ export default class Recognizer {
 			return [];
 		}
 
-		// let lineNum = 0;
-		let currLine; //= this.scheduleLines.shift();
+		let currLine;
 		let eventDate;
 		let counter = 0;
 
 		// Find line that has a valid date (but is not the week descriptor date at top of schedule)...
 		for (let i = 0; i < this.scheduleLines.length; i++) {
 			// Check line if it has a date...
-			eventDate = this.scheduleLines[i].text.match(/\w{2,4}.\d{1,2}/);
+			eventDate = this.scheduleLines[i].text
+				.toLowerCase()
+				.match(/[a-z]{2,9}.\d{1,2}.+20\d{1,2}/); // NOTE: Consider using (([a-zA-Z]{2,9}){1}(\w*\s*)*){1}\d{1,2} to include anyting inbetween the month and date (then remove the middle portion)
 			if (eventDate) {
-				let weekDesc = this.scheduleLines[i].text.match(/\w{2,4}.\d{1,2}.-/); // NEEDS TESTING!!!
+				let weekDesc = this.scheduleLines[i].text
+					.toLowerCase()
+					.match(/[a-z]{2,9}.\d{1,2}.+-/);
 				if (!weekDesc) {
 					// Successful date found, proceed...
 					currLine = this.scheduleLines[i];
 					break;
+				} else {
+					this.scheduleLines.shift(); // Remove the useless week description
+					i--;
 				}
+			} else {
+				this.scheduleLines.shift(); // Remove the useless non-date line (date must be first)
+				i--;
 			}
 
 			counter++;
@@ -99,10 +108,10 @@ export default class Recognizer {
 		if (!eventDate) return [];
 
 		// Remove the lines that were trash...
-		while (counter > 0) {
-			this.scheduleLines.shift();
-			counter--;
-		}
+		// while (counter > 0) {
+		// 	this.scheduleLines.shift();
+		// 	counter--;
+		// }
 
 		// Make currLine the date...
 		currLine = this.scheduleLines.shift();
