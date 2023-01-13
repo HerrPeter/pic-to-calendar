@@ -39,51 +39,31 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var tesseract_js_1 = __importDefault(require("tesseract.js"));
 var recognizer_1 = __importDefault(require("./recognizer"));
 var imageDir = process.argv.slice(2)[0] || __dirname + '/NEW_job.jpg';
 var image;
 var imageLines;
-var getText = function (image) { return __awaiter(void 0, void 0, void 0, function () {
-    var data;
-    return __generator(this, function (_a) {
-        switch (_a.label) {
-            case 0: return [4 /*yield*/, tesseract_js_1.default.recognize(image, 'eng', {
-                // logger: (m) => console.log(m),
-                })];
-            case 1:
-                data = _a.sent();
-                return [2 /*return*/, data];
-        }
-    });
-}); };
 var main = function () { return __awaiter(void 0, void 0, void 0, function () {
     var myRec, events;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
+                // Attempt to auth via Google and add events automatically (COMING SOON)
                 // console.log('Authenticating...');
                 // myRec.authorize();
-                // return;
-                // let t = 'jan 20’ 2023';
-                // let newD = t.replace(/[^a-zA-Z\d ]/, '');
-                // let dt = new Date(newD);
-                // console.log(dt);
-                // return;
-                // let testStuff = '@ 10:30 to 15:30\n';
-                // let regEx = testStuff.match(/\w{3,4}.\d{1,2}/);
-                // console.log(regEx);
-                // return;
                 console.log('Extracting text from image (Please Wait) ...');
-                return [4 /*yield*/, getText(imageDir)];
+                return [4 /*yield*/, recognizer_1.default.getText(imageDir)];
             case 1:
                 image = _a.sent();
                 imageLines = image.data.lines;
                 myRec = new recognizer_1.default(imageLines);
+                console.log('Extracting relavent scheduled events (Please Wait)...');
                 events = myRec.getAllEvents();
                 console.log('Events:');
                 console.log(events);
-                myRec.createIcsFile(events); // Not working bc ics is undefined (FIXED via using require() instead of import)
+                console.log('Creating the ICS file for the gathered events (Please Wait)...');
+                myRec.createIcsFile(events);
+                console.log('Done!');
                 return [2 /*return*/];
         }
     });

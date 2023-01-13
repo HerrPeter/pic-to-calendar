@@ -1,45 +1,27 @@
-import Tesseract from 'tesseract.js';
 import Recognizer from './recognizer';
 
 const imageDir: string = process.argv.slice(2)[0] || __dirname + '/NEW_job.jpg';
 let image: Tesseract.RecognizeResult;
 let imageLines: Tesseract.Line[];
 
-const getText = async (image: string): Promise<Tesseract.RecognizeResult> => {
-	let data = await Tesseract.recognize(image, 'eng', {
-		// logger: (m) => console.log(m),
-	});
-
-	return data;
-};
-
 const main = async () => {
+	// Attempt to auth via Google and add events automatically (COMING SOON)
 	// console.log('Authenticating...');
 	// myRec.authorize();
-	// return;
-
-	// let t = 'jan 20’ 2023';
-	// let newD = t.replace(/[^a-zA-Z\d ]/, '');
-	// let dt = new Date(newD);
-	// console.log(dt);
-	// return;
-
-	// let testStuff = '@ 10:30 to 15:30\n';
-	// let regEx = testStuff.match(/\w{3,4}.\d{1,2}/);
-	// console.log(regEx);
-	// return;
 
 	console.log('Extracting text from image (Please Wait) ...');
-
-	image = await getText(imageDir);
+	image = await Recognizer.getText(imageDir);
 	imageLines = image.data.lines;
 	let myRec = new Recognizer(imageLines);
 
+	console.log('Extracting relavent scheduled events (Please Wait)...');
 	let events = myRec.getAllEvents();
 	console.log('Events:');
 	console.log(events);
 
-	myRec.createIcsFile(events); // Not working bc ics is undefined (FIXED via using require() instead of import)
+	console.log('Creating the ICS file for the gathered events (Please Wait)...');
+	myRec.createIcsFile(events);
+	console.log('Done!');
 };
 
 main();

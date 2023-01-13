@@ -234,22 +234,12 @@ debug@4, debug@^4.1.0:
   dependencies:
     ms "2.1.2"
 
-detect-node@^2.0.3:
-  version "2.1.0"
-  resolved "https://registry.yarnpkg.com/detect-node/-/detect-node-2.1.0.tgz#c9c70775a49c3d03bc2c06d9a73be550f978f8b1"
-  integrity sha512-T0NIuQpnTvFDATNuHN5roPwSBG83rFsuO+MXXH9/3N1eFbn4wcPjttvjMLEPWJ0RGUYgQE7cGgS3tNxbqCGM7g==
-
 ecdsa-sig-formatter@1.0.11, ecdsa-sig-formatter@^1.0.11:
   version "1.0.11"
   resolved "https://registry.yarnpkg.com/ecdsa-sig-formatter/-/ecdsa-sig-formatter-1.0.11.tgz#ae0f0fa2d85045ef14a817daa3ce9acd0489e5bf"
   integrity sha512-nagl3RYrbNv6kQkeJIpt6NJZy8twLB/2vtz6yN9Z4vRKHN4/QZJIEbqohALSgwKdnksuY3k5Addp5lg8sVoVcQ==
   dependencies:
     safe-buffer "^5.0.1"
-
-es6-error@^1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/es6-error/-/es6-error-1.0.0.tgz#7ee0a88cb12f3cbeee4b5d2e834da4ab5b0fd396"
-  integrity sha512-btHTpQ7RinLP1/FLtC9h92mBgIazgkeq5nfxMK3AH2kilEKBjuCw1vNrDfviv0zWJd6nJHrMI0jgWageEBaxcA==
 
 escape-string-regexp@^1.0.5:
   version "1.0.5"
@@ -389,16 +379,6 @@ https-proxy-agent@^5.0.0:
     agent-base "6"
     debug "4"
 
-ics-js@^0.10.2:
-  version "0.10.2"
-  resolved "https://registry.yarnpkg.com/ics-js/-/ics-js-0.10.2.tgz#d478ea3f832540a6d940dca370203412a0ce69d4"
-  integrity sha512-EWSN1NVjCEhHS+9jZoKH9VRIEu+4gmldhHBmG6RD54BHEe7vYpL0uEJe0AGIHQlkR3gYbXWmc17C0/tlMDxCcw==
-  dependencies:
-    detect-node "^2.0.3"
-    es6-error "^1.0.0"
-    lodash.difference "^4.3.0"
-    simple-guid "0.0.1"
-
 ics@^2.41.0:
   version "2.41.0"
   resolved "https://registry.yarnpkg.com/ics/-/ics-2.41.0.tgz#cd73e12e36bb8711f2d883a40b096203af26f450"
@@ -472,11 +452,6 @@ lodash-es@^4.17.21:
   version "4.17.21"
   resolved "https://registry.yarnpkg.com/lodash-es/-/lodash-es-4.17.21.tgz#43e626c46e6591b7750beb2b50117390c609e3ee"
   integrity sha512-mKnC+QJ9pWVzv+C4/U3rRsHapFfHvQFoFB92e52xeyGMcX6/OlIl78je1u8vePzYZSkkogMPJ2yjxxsb89cxyw==
-
-lodash.difference@^4.3.0:
-  version "4.5.0"
-  resolved "https://registry.yarnpkg.com/lodash.difference/-/lodash.difference-4.5.0.tgz#9ccb4e505d486b91651345772885a2df27fd017c"
-  integrity sha512-dS2j+W26TQ7taQBGN8Lbbq04ssV3emRw4NY58WErlTO29pIqS0HmoT5aJ9+TUQ1N3G+JOZSji4eugsWwGp9yPA==
 
 lodash@^4.17.21:
   version "4.17.21"
@@ -576,11 +551,6 @@ side-channel@^1.0.4:
     call-bind "^1.0.0"
     get-intrinsic "^1.0.2"
     object-inspect "^1.9.0"
-
-simple-guid@0.0.1:
-  version "0.0.1"
-  resolved "https://registry.yarnpkg.com/simple-guid/-/simple-guid-0.0.1.tgz#d5e819f3c7f7ad3d1a8821eab60d8fed0d3917ea"
-  integrity sha512-i7m76Jm6Gyuo1y91UIxNJn+99tupRgUOeQtG/+/VW/y6jysNTZlK1iYV021dDD5YeynHhr0oDXDgz95RLE2phw==
 
 supports-color@^5.3.0:
   version "5.5.0"

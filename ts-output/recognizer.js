@@ -54,13 +54,17 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
+var tesseract_js_1 = __importDefault(require("tesseract.js"));
 var googleapis_1 = require("googleapis");
-var ics = __importStar(require("../node_modules/ics"));
+var ics = __importStar(require("ics"));
 var fs_1 = require("fs");
-var CLIENT_ID = '647262258664-22jl8e63pvorqjh9mfq556omhgq2ag0p.apps.googleusercontent.com';
-var CLIENT_SECRET = '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';
-var API_KEY = 'AIzaSyBjSVW6jIDSujoHZC-b6ZQ5wrFdY8naVf0';
+var CLIENT_ID = '';
+var CLIENT_SECRET = '';
+var API_KEY = '';
 var Recognizer = /** @class */ (function () {
     function Recognizer(textLines) {
         var _this = this;
@@ -378,6 +382,19 @@ var Recognizer = /** @class */ (function () {
         }); };
         this.scheduleLines = textLines;
     }
+    Recognizer.getText = function (image) { return __awaiter(void 0, void 0, void 0, function () {
+        var data;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0: return [4 /*yield*/, tesseract_js_1.default.recognize(image, 'eng', {
+                    // logger: (m) => console.log(m),
+                    })];
+                case 1:
+                    data = _a.sent();
+                    return [2 /*return*/, data];
+            }
+        });
+    }); };
     Recognizer.createNewEvent = function (date, startTime, endTime, summary) {
         // Remove invalid characters...
         date = date.replace(/[^a-zA-Z\d ]/, ' ');

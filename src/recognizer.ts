@@ -1,13 +1,11 @@
 import Tesseract from 'tesseract.js';
 import { calendar_v3, google } from 'googleapis';
-import * as ics from '../node_modules/ics';
-import * as ICS from 'ics-js';
+import * as ics from 'ics';
 import { writeFileSync } from 'fs';
 
-const CLIENT_ID =
-	'647262258664-22jl8e63pvorqjh9mfq556omhgq2ag0p.apps.googleusercontent.com';
-const CLIENT_SECRET = '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';
-const API_KEY = 'AIzaSyBjSVW6jIDSujoHZC-b6ZQ5wrFdY8naVf0';
+const CLIENT_ID = '';
+const CLIENT_SECRET = '';
+const API_KEY = '';
 
 interface Event {
 	summary?: string | null;
@@ -53,6 +51,16 @@ export default class Recognizer {
 		// // Acquire an auth client, and bind it to all future calls
 		this.authClient = await auth.getClient();
 		// google.options({ auth: this.authClient });
+	};
+
+	public static getText = async (
+		image: string
+	): Promise<Tesseract.RecognizeResult> => {
+		let data = await Tesseract.recognize(image, 'eng', {
+			// logger: (m) => console.log(m),
+		});
+
+		return data;
 	};
 
 	getAllEvents = (): Event[] => {
