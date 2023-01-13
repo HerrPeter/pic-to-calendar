@@ -112,7 +112,6 @@ var Recognizer = /** @class */ (function () {
             if (_this.scheduleLines.length == 0) {
                 return [];
             }
-            var currLine;
             var eventDate;
             // Find line that has a valid date (but is not the week descriptor date at top of schedule)...
             for (var i = 0; i < _this.scheduleLines.length; i++) {
@@ -126,7 +125,6 @@ var Recognizer = /** @class */ (function () {
                         .match(/[a-z]{2,9}.\d{1,2}.+-/);
                     if (!weekDesc) {
                         // Successful date found, proceed...
-                        currLine = _this.scheduleLines[i];
                         break;
                     }
                     else {
@@ -142,8 +140,8 @@ var Recognizer = /** @class */ (function () {
             // If no date is found -> invalid input...
             if (!eventDate)
                 return [];
-            // Make currLine the date...
-            currLine = _this.scheduleLines.shift();
+            // Remove the date line...
+            _this.scheduleLines.shift();
             // Get second line (has either a time or a week day)...
             var secondLine = _this.scheduleLines.shift();
             if (secondLine) {
