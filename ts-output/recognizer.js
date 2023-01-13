@@ -35,8 +35,13 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 var googleapis_1 = require("googleapis");
+var ics_1 = __importDefault(require("../node_modules/ics"));
+var fs_1 = require("fs");
 var CLIENT_ID = '647262258664-22jl8e63pvorqjh9mfq556omhgq2ag0p.apps.googleusercontent.com';
 var CLIENT_SECRET = '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';
 var API_KEY = 'AIzaSyBjSVW6jIDSujoHZC-b6ZQ5wrFdY8naVf0';
@@ -292,6 +297,47 @@ var Recognizer = /** @class */ (function () {
                         console.log(res.data);
                         return [2 /*return*/];
                 }
+            });
+        }); };
+        this.createIcsFile = function (events) { return __awaiter(_this, void 0, void 0, function () {
+            var icsEvents;
+            return __generator(this, function (_a) {
+                if (!events)
+                    return [2 /*return*/, null];
+                icsEvents = [];
+                events.forEach(function (event) {
+                    var icsEvent = {
+                        start: [
+                            event.start.dateTime.getFullYear(),
+                            event.start.dateTime.getMonth(),
+                            event.start.dateTime.getDate(),
+                            event.start.dateTime.getHours(),
+                            event.start.dateTime.getMinutes(),
+                        ],
+                        // duration: {hours: 2, minutes: 30},
+                        title: event.summary || 'No Title',
+                        end: [
+                            event.end.dateTime.getFullYear(),
+                            event.end.dateTime.getMonth(),
+                            event.end.dateTime.getDate(),
+                            event.end.dateTime.getHours(),
+                            event.end.dateTime.getMinutes(),
+                        ],
+                    };
+                    icsEvents.push(icsEvent);
+                });
+                // let icsResults = await ics.createEvents(icsEvents);
+                ics_1.default.createEvents(icsEvents, function (err, value) {
+                    if (err) {
+                        console.log(err);
+                        return null;
+                    }
+                    else if (value) {
+                        fs_1.writeFileSync(__dirname + "/event.ics", value);
+                        return null;
+                    }
+                });
+                return [2 /*return*/];
             });
         }); };
         this.scheduleLines = textLines;

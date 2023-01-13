@@ -1,5 +1,7 @@
 import Tesseract from 'tesseract.js';
 import { calendar_v3, google } from 'googleapis';
+import ics from '../node_modules/ics';
+import { writeFileSync } from 'fs';
 
 const CLIENT_ID =
 	'647262258664-22jl8e63pvorqjh9mfq556omhgq2ag0p.apps.googleusercontent.com';
@@ -8,13 +10,13 @@ const API_KEY = 'AIzaSyBjSVW6jIDSujoHZC-b6ZQ5wrFdY8naVf0';
 
 interface Event {
 	summary?: string | null;
-	start?: {
+	start: {
 		date?: string | Date;
-		dateTime: string | Date;
+		dateTime: Date;
 	};
-	end?: {
+	end: {
 		date?: string | Date;
-		dateTime: string | Date;
+		dateTime: Date;
 	};
 }
 
@@ -330,5 +332,45 @@ export default class Recognizer {
 		console.log('-- New Event Should Now Be Added --');
 		console.log('-- -- Response Data below -- --');
 		console.log(res.data);
+	};
+
+	createIcsFile = async (events: Event[]) => {
+		if (!events) return null;
+
+		let icsEvents: ics.EventAttributes[] = [];
+
+		events.forEach((event) => {
+			let icsEvent: ics.EventAttributes = {
+				start: [
+					event.start.dateTime.getFullYear(),
+					event.start.dateTime.getMonth(),
+					event.start.dateTime.getDate(),
+					event.start.dateTime.getHours(),
+					event.start.dateTime.getMinutes(),
+				],
+				// duration: {hours: 2, minutes: 30},
+				title: event.summary || 'No Title',
+				end: [
+					event.end.dateTime.getFullYear(),
+					event.end.dateTime.getMonth(),
+					event.end.dateTime.getDate(),
+					event.end.dateTime.getHours(),
+					event.end.dateTime.getMinutes(),
+				],
+			};
+
+			icsEvents.push(icsEvent);
+		});
+
+		// let icsResults = await ics.createEvents(icsEvents);
+		ics.createEvents(icsEvents, (err, value) => {
+			if (err) {
+				console.log(err);
+				return null;
+			} else if (value) {
+				writeFileSync(`${__dirname}/event.ics`, value);
+				return null;
+			}
+		});
 	};
 }

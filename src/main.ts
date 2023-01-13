@@ -27,6 +27,8 @@ const main = async () => {
 	let events = myRec.getAllEvents();
 	console.log('Events:');
 	console.log(events);
+
+	// myRec.createIcsFile(events); // Not working bc ics is undefined !!!
 };
 
 main();
