@@ -74,6 +74,7 @@ var main = function () { return __awaiter(void 0, void 0, void 0, function () {
                 events = myRec.getAllEvents();
                 console.log('Events:');
                 console.log(events);
+                myRec.createIcsFile(events); // Not working bc ics is undefined (FIXED via using require() instead of import)
                 return [2 /*return*/];
         }
     });

@@ -1,6 +1,7 @@
 import Tesseract from 'tesseract.js';
 import { calendar_v3, google } from 'googleapis';
-import ics from '../node_modules/ics';
+import * as ics from '../node_modules/ics';
+import * as ICS from 'ics-js';
 import { writeFileSync } from 'fs';
 
 const CLIENT_ID =
@@ -334,6 +335,14 @@ export default class Recognizer {
 		console.log(res.data);
 	};
 
+	NEW_createIcsFile = (events: Event[]) => {
+		let cal = new ICS.VCALENDAR();
+
+		let event = new ICS.VEVENT();
+		event.addProp('');
+		return;
+	};
+
 	createIcsFile = async (events: Event[]) => {
 		if (!events) return null;
 
@@ -343,7 +352,7 @@ export default class Recognizer {
 			let icsEvent: ics.EventAttributes = {
 				start: [
 					event.start.dateTime.getFullYear(),
-					event.start.dateTime.getMonth(),
+					event.start.dateTime.getMonth() + 1,
 					event.start.dateTime.getDate(),
 					event.start.dateTime.getHours(),
 					event.start.dateTime.getMinutes(),
@@ -352,7 +361,7 @@ export default class Recognizer {
 				title: event.summary || 'No Title',
 				end: [
 					event.end.dateTime.getFullYear(),
-					event.end.dateTime.getMonth(),
+					event.end.dateTime.getMonth() + 1,
 					event.end.dateTime.getDate(),
 					event.end.dateTime.getHours(),
 					event.end.dateTime.getMinutes(),

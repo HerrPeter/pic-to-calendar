@@ -28,7 +28,7 @@ const main = async () => {
 	console.log('Events:');
 	console.log(events);
 
-	// myRec.createIcsFile(events); // Not working bc ics is undefined !!!
+	myRec.createIcsFile(events); // Not working bc ics is undefined (FIXED via using require() instead of import)
 };
 
 main();
