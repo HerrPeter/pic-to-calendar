@@ -32,6 +32,9 @@ export default class Recognizer {
 		this.scheduleLines = textLines;
 	}
 
+	/**
+	 * (WIP) Authorize the use of the client's calendar to add events automatically.
+	 */
 	authorize = async () => {
 		let authClient = new google.auth.OAuth2(CLIENT_ID, CLIENT_SECRET);
 
@@ -57,6 +60,11 @@ export default class Recognizer {
 		// google.options({ auth: this.authClient });
 	};
 
+	/**
+	 * Get the raw data extracted from the image provided.
+	 * @param image The directory of the image to scan.
+	 * @returns Raw data from the image.
+	 */
 	public static getText = async (
 		image: string
 	): Promise<Tesseract.RecognizeResult> => {
@@ -67,12 +75,19 @@ export default class Recognizer {
 		return data;
 	};
 
+	/**
+	 * Gets all events parsed from the image's lines.
+	 * @returns Array of Event objects.
+	 */
 	getAllEvents = (): Event[] => {
 		let allEvents: Event[] = [];
 		if (!this.scheduleLines) return allEvents;
 
 		while (this.scheduleLines.length > 1) {
-			let events = this.TEST2_getNextEvent();
+			// Get all events in the next day of the week.
+			let events = this.getNextEvent();
+
+			// Add current day's events to list of all events.
 			events.forEach((event) => {
 				allEvents.push(event);
 			});
@@ -81,7 +96,11 @@ export default class Recognizer {
 		return allEvents;
 	};
 
-	getNextEvent = (): Event[] => {
+	/**
+	 * (DEPRICATED) Gets the next event from list of schedule lines.
+	 * @returns Array of events for the current day of the week.
+	 */
+	OLD_getNextEvent = (): Event[] => {
 		if (this.scheduleLines.length == 0) {
 			return [];
 		}
@@ -251,6 +270,11 @@ export default class Recognizer {
 		return [];
 	};
 
+	/**
+	 * Gets the valid date from the provided string (i.e. "Jan 13, 2023").
+	 * @param str The string to parse the date from.
+	 * @returns Returns the match for the date format or null.
+	 */
 	private static getValidDate = (str: string): RegExpMatchArray | null => {
 		let date = str.toLowerCase().match(/[a-z]{2,9}.\d{1,2}.+20\d{1,2}/);
 
@@ -263,6 +287,11 @@ export default class Recognizer {
 		}
 	};
 
+	/**
+	 * Gets the start/end time of the currently provided string.
+	 * @param str The string to parse the start/end time from.
+	 * @returns EventTime object or null
+	 */
 	private static getEventTime = (str: string): EventTime | null => {
 		// Get start time...
 		let startTime: RegExpMatchArray | null = str.match(/\d{2}:\d{2}/);
@@ -280,25 +309,15 @@ export default class Recognizer {
 				};
 
 				return eventTime;
-				// // Get event title...
-				// let titleLine = this.scheduleLines.shift();
-
-				// if (titleLine) {
-				// 	let summary = titleLine.text;
-				// 	events.push(
-				// 		Recognizer.createNewEvent(
-				// 			eventDate[0],
-				// 			startTime[0],
-				// 			endTime[0],
-				// 			summary
-				// 		)
-				// 	);
-				// }
 			} else return null;
 		} else return null;
 	};
 
-	TEST2_getNextEvent = (): Event[] => {
+	/**
+	 * Officially working method for getting the next event.
+	 * @returns Array of events.
+	 */
+	getNextEvent = (): Event[] => {
 		if (this.scheduleLines.length == 0) {
 			return [];
 		}
@@ -319,29 +338,6 @@ export default class Recognizer {
 				i--;
 			}
 		}
-
-		// Check line if it has a date...
-		// 	eventDate = this.scheduleLines[i].text
-		// 		.toLowerCase()
-		// 		.match(/[a-z]{2,9}.\d{1,2}.+20\d{1,2}/); // NOTE: Consider using (([a-zA-Z]{2,9}){1}(\w*\s*)*){1}\d{1,2} to include anyting inbetween the month and date (then remove the middle portion)
-		// 	if (eventDate) {
-		// 		let weekDesc = this.scheduleLines[i].text
-		// 			.toLowerCase()
-		// 			.match(/[a-z]{2,9}.\d{1,2}.+-/);
-		// 		if (!weekDesc) {
-		// 			// Successful date found, proceed...
-		// 			// -- Remove the date line...
-		// 			this.scheduleLines.shift();
-		// 			break;
-		// 		} else {
-		// 			this.scheduleLines.shift(); // Remove the useless week description
-		// 			i--;
-		// 		}
-		// 	} else {
-		// 		this.scheduleLines.shift(); // Remove the useless non-date line (date must be first)
-		// 		i--;
-		// 	}
-		// }
 
 		// If no date is found -> invalid input...
 		if (!eventDate) return [];
@@ -373,6 +369,7 @@ export default class Recognizer {
 				let titleLine = this.scheduleLines.shift();
 				if (!titleLine) break;
 
+				// Create and add the new event found...
 				let summary = titleLine.text;
 				events.push(
 					Recognizer.createNewEvent(
@@ -390,253 +387,14 @@ export default class Recognizer {
 		return events;
 	};
 
-	TEST_getNextEvent = (): Event[] => {
-		if (this.scheduleLines.length == 0) {
-			return [];
-		}
-
-		let eventDate;
-
-		// Find line that has a valid date (but is not the week descriptor date at top of schedule)...
-		for (let i = 0; i < this.scheduleLines.length; i++) {
-			// Check line if it has a date...
-			eventDate = this.scheduleLines[i].text
-				.toLowerCase()
-				.match(/[a-z]{2,9}.\d{1,2}.+20\d{1,2}/); // NOTE: Consider using (([a-zA-Z]{2,9}){1}(\w*\s*)*){1}\d{1,2} to include anyting inbetween the month and date (then remove the middle portion)
-			if (eventDate) {
-				let weekDesc = this.scheduleLines[i].text
-					.toLowerCase()
-					.match(/[a-z]{2,9}.\d{1,2}.+-/);
-				if (!weekDesc) {
-					// Successful date found, proceed...
-					break;
-				} else {
-					this.scheduleLines.shift(); // Remove the useless week description
-					i--;
-				}
-			} else {
-				this.scheduleLines.shift(); // Remove the useless non-date line (date must be first)
-				i--;
-			}
-		}
-
-		// If no date is found -> invalid input...
-		if (!eventDate) return [];
-
-		// Remove the date line...
-		this.scheduleLines.shift();
-
-		// List of events in current date (i.e. splits)
-		let events: Event[] = [];
-
-		// While next line is not a date and not a time, check the next line...
-		while (true) {
-			let nextLine = this.scheduleLines.shift();
-			if (nextLine) {
-				// Check if next line is a date...
-				if (Recognizer.getValidDate(nextLine.text)) {
-					this.scheduleLines.unshift(nextLine);
-					return events;
-				}
-
-				// Get start time...
-				let startTime: RegExpMatchArray | null = nextLine.text.match(/\d{2}:\d{2}/);
-
-				if (startTime) {
-					// Get end time...
-					let continueIndex = startTime[0].length + (startTime.index || 0);
-					nextLine.text = nextLine.text.substring(continueIndex);
-					let endTime = nextLine.text.match(/\d{2}:\d{2}/);
-
-					if (endTime) {
-						// Get event title...
-						let titleLine = this.scheduleLines.shift();
-
-						if (titleLine) {
-							let summary = titleLine.text;
-							events.push(
-								Recognizer.createNewEvent(
-									eventDate[0],
-									startTime[0],
-									endTime[0],
-									summary
-								)
-							);
-						}
-					}
-				} else {
-					// Check if the next line is a date (i.e. the start of next event) or time or something else
-					let nextLine = this.scheduleLines.shift();
-					if (nextLine) {
-						if (Recognizer.getValidDate(nextLine.text)) return events;
-
-						let startTime = nextLine.text.match(/\d{2}:\d{2}/);
-						if (startTime) {
-							// Get end time...normal 4 line..
-							let continueIndex = startTime[0].length + (startTime.index || 0);
-							nextLine.text = nextLine.text.substring(continueIndex);
-							let endTime = nextLine.text.match(/\d{2}:\d{2}/);
-
-							if (endTime) {
-								// Get event title...
-								let titleLine = this.scheduleLines.shift();
-
-								if (titleLine) {
-									let summary = titleLine.text;
-									events.push(
-										Recognizer.createNewEvent(
-											eventDate[0],
-											startTime[0],
-											endTime[0],
-											summary
-										)
-									);
-								}
-							}
-						}
-						// Possible RDO/ADO/Next Date/...
-					}
-				}
-				return events; // Invalid (no next line | probably a day off).
-			}
-
-			// Get second line (has either a time or a week day)...
-			let secondLine = this.scheduleLines.shift();
-			if (secondLine) {
-				// Get start time...
-				let startTime: RegExpMatchArray | null =
-					secondLine.text.match(/\d{2}:\d{2}/);
-
-				// If has time -> is Normal shift with the "Today" header (3 lines)/reg shift (schedule view)
-				if (startTime) {
-					// Get end time...
-					let continueIndex = startTime[0].length + (startTime.index || 0);
-					secondLine.text = secondLine.text.substring(continueIndex);
-					let endTime: RegExpMatchArray | null =
-						secondLine.text.match(/\d{2}:\d{2}/);
-
-					// If has end time -> end time of Normal shift (3 lines)
-					if (endTime) {
-						// Get third line...
-						let thirdLine = this.scheduleLines.shift();
-
-						// Get summary for Normal shift (3 lines)
-						if (thirdLine) {
-							// Get summary
-							let summary = thirdLine.text;
-							return [
-								Recognizer.createNewEvent(
-									eventDate[0],
-									startTime[0],
-									endTime[0],
-									summary
-								),
-							];
-						}
-					} else {
-						this.scheduleLines.unshift(secondLine);
-						return []; // Invalid (no end time).
-					}
-				}
-				// This is possible RDO/ADO+/Split Shift (app)/Normal (4 lines)
-				else {
-					// Check 2 lines down to see if split shift or not
-					let thirdLine = this.scheduleLines.shift();
-					if (thirdLine) {
-						// Get start time...
-						let startTime: RegExpMatchArray | null =
-							thirdLine.text.match(/\d{2}:\d{2}/);
-
-						// This is either a normal shift (4 lines) or split (4 or more lines)
-						if (startTime) {
-							// Get end time...
-							let continueIndex = startTime[0].length + (startTime.index || 0);
-							thirdLine.text = thirdLine.text.substring(continueIndex);
-							let endTime: RegExpMatchArray | null =
-								thirdLine.text.match(/\d{2}:\d{2}/);
-
-							// If has end time -> end time of Normal shift (4 lines)
-							if (endTime) {
-								// Get third line...
-								let fourthLine = this.scheduleLines.shift();
-
-								// Get summary for Normal shift (4 lines)
-								if (fourthLine) {
-									// Get summary
-									let summary = fourthLine.text;
-									let events: Event[] = [];
-									events.push(
-										Recognizer.createNewEvent(
-											eventDate[0],
-											startTime[0],
-											endTime[0],
-											summary
-										)
-									);
-
-									// Now check if there are more schedules (i.e. splits) until new date is reached/end of scheduleLines...
-									// Check line if it has a date...
-									while (true) {
-										let newLine = this.scheduleLines.shift();
-										if (newLine) {
-											let newStartTime = newLine.text.match(/\d{2}:\d{2}/);
-											if (newStartTime) {
-												// Get end time...
-												let continueIndex =
-													startTime[0].length + (startTime.index || 0);
-												newLine.text = newLine.text.substring(continueIndex);
-												let newEndTime = newLine.text.match(/\d{2}:\d{2}/);
-
-												if (newEndTime) {
-													// Get third line...
-													let summaryLine = this.scheduleLines.shift();
-
-													// Get summary for Normal shift (3 lines)
-													if (summaryLine) {
-														// Get summary
-														let summary = summaryLine.text;
-														events.push(
-															Recognizer.createNewEvent(
-																eventDate[0],
-																newStartTime[0],
-																newEndTime[0],
-																summary
-															)
-														);
-													} else break;
-												} else break;
-											} else {
-												this.scheduleLines.unshift(newLine);
-												break;
-											}
-										} else break;
-									}
-
-									// Return all scheuldes as array.
-									return events;
-								} else {
-									this.scheduleLines.unshift(thirdLine);
-									this.scheduleLines.unshift(secondLine);
-									return []; // Invalid (missing a summary).
-								}
-							} else {
-								this.scheduleLines.unshift(thirdLine);
-								this.scheduleLines.unshift(secondLine);
-								return []; // Invalid (missing an end time).
-							}
-						} else {
-							this.scheduleLines.unshift(thirdLine);
-							this.scheduleLines.unshift(secondLine);
-							return []; // Invalid (probably an ADO/RDO).
-						}
-					} else return []; // Invalid (no next line).
-				}
-			} else return []; // Invalid (no next line | probably a day off).
-
-			return [];
-		}
-	};
-
+	/**
+	 * Creates and returns a new Event instance.
+	 * @param date Date of the event.
+	 * @param startTime Start time of the event.
+	 * @param endTime End time of the event.
+	 * @param summary Title of the event.
+	 * @returns Event object
+	 */
 	private static createNewEvent = (
 		date: string,
 		startTime: string,
@@ -678,7 +436,11 @@ export default class Recognizer {
 		);
 	};
 
-	addToCalendar = async (event: Event) => {
+	/**
+	 * (WIP) Eventually connects to client's google calendar and adds the events automatically.
+	 * @param events Array of events.
+	 */
+	addToCalendar = async (events: Event[]) => {
 		// Note: Selected Calendar needs to be a user's calendar ID
 		// Note: Request Body supplies the info for the new event to be added
 		let res = await google.calendar('v3').events.insert({
@@ -734,6 +496,11 @@ export default class Recognizer {
 		console.log(res.data);
 	};
 
+	/**
+	 * Officially creates and saves all events to an .ics file in the local directory.
+	 * @param events Array of events to save to the calendar file.
+	 * @returns Returns a promise.
+	 */
 	createIcsFile = async (events: Event[]) => {
 		if (!events) return null;
 
@@ -758,7 +525,7 @@ export default class Recognizer {
 				],
 				alarms: [
 					{
-						action: 'audio',
+						action: 'display',
 						description: 'Reminder: ' + event.summary || '',
 						trigger: {
 							hours: 2,
@@ -786,7 +553,7 @@ export default class Recognizer {
 				console.log(err);
 				return null;
 			} else if (value) {
-				writeFileSync(`${__dirname}/event.ics`, value);
+				writeFileSync(`${__dirname}/job-schedule.ics`, value);
 				return null;
 			}
 		});
