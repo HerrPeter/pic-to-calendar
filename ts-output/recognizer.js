@@ -105,7 +105,7 @@ var Recognizer = /** @class */ (function () {
             if (!_this.scheduleLines)
                 return allEvents;
             while (_this.scheduleLines.length > 1) {
-                var events = _this.getNextEvent();
+                var events = _this.TEST2_getNextEvent();
                 events.forEach(function (event) {
                     allEvents.push(event);
                 });
@@ -261,6 +261,287 @@ var Recognizer = /** @class */ (function () {
                 return []; // Invalid (no next line | probably a day off).
             return [];
         };
+        this.TEST2_getNextEvent = function () {
+            if (_this.scheduleLines.length == 0) {
+                return [];
+            }
+            var eventDate;
+            // Find line that has a valid date (but is not the week descriptor date at top of schedule)...
+            for (var i = 0; i < _this.scheduleLines.length; i++) {
+                eventDate = Recognizer.getValidDate(_this.scheduleLines[i].text);
+                if (eventDate) {
+                    // Remove the successful date from the list...
+                    _this.scheduleLines.shift();
+                    break;
+                }
+                else {
+                    // Remove the useless lines...
+                    _this.scheduleLines.shift();
+                    i--;
+                }
+            }
+            // Check line if it has a date...
+            // 	eventDate = this.scheduleLines[i].text
+            // 		.toLowerCase()
+            // 		.match(/[a-z]{2,9}.\d{1,2}.+20\d{1,2}/); // NOTE: Consider using (([a-zA-Z]{2,9}){1}(\w*\s*)*){1}\d{1,2} to include anyting inbetween the month and date (then remove the middle portion)
+            // 	if (eventDate) {
+            // 		let weekDesc = this.scheduleLines[i].text
+            // 			.toLowerCase()
+            // 			.match(/[a-z]{2,9}.\d{1,2}.+-/);
+            // 		if (!weekDesc) {
+            // 			// Successful date found, proceed...
+            // 			// -- Remove the date line...
+            // 			this.scheduleLines.shift();
+            // 			break;
+            // 		} else {
+            // 			this.scheduleLines.shift(); // Remove the useless week description
+            // 			i--;
+            // 		}
+            // 	} else {
+            // 		this.scheduleLines.shift(); // Remove the useless non-date line (date must be first)
+            // 		i--;
+            // 	}
+            // }
+            // If no date is found -> invalid input...
+            if (!eventDate)
+                return [];
+            // List of events in current date (i.e. splits)
+            var events = [];
+            // Start loop...
+            while (true) {
+                // Check if next line exists (break case)
+                var nextLine = _this.scheduleLines.shift();
+                if (!nextLine)
+                    break;
+                // Check if next line is a date (break case)
+                // -- True: break (done with current event)
+                // -- False: check if next line has a time (normal event)
+                // -- -- Continue while loop
+                var nextEventDate = Recognizer.getValidDate(nextLine.text);
+                if (nextEventDate) {
+                    // Done with the current event
+                    _this.scheduleLines.unshift(nextLine);
+                    break;
+                }
+                // Check if the next line has an event time...
+                var eventTime = Recognizer.getEventTime(nextLine.text);
+                if (eventTime) {
+                    // Get event summary...
+                    var titleLine = _this.scheduleLines.shift();
+                    if (!titleLine)
+                        break;
+                    var summary = titleLine.text;
+                    events.push(Recognizer.createNewEvent(eventDate[0], eventTime.start, eventTime.end, summary));
+                    continue;
+                }
+                else
+                    continue;
+            }
+            return events;
+        };
+        this.TEST_getNextEvent = function () {
+            if (_this.scheduleLines.length == 0) {
+                return [];
+            }
+            var eventDate;
+            // Find line that has a valid date (but is not the week descriptor date at top of schedule)...
+            for (var i = 0; i < _this.scheduleLines.length; i++) {
+                // Check line if it has a date...
+                eventDate = _this.scheduleLines[i].text
+                    .toLowerCase()
+                    .match(/[a-z]{2,9}.\d{1,2}.+20\d{1,2}/); // NOTE: Consider using (([a-zA-Z]{2,9}){1}(\w*\s*)*){1}\d{1,2} to include anyting inbetween the month and date (then remove the middle portion)
+                if (eventDate) {
+                    var weekDesc = _this.scheduleLines[i].text
+                        .toLowerCase()
+                        .match(/[a-z]{2,9}.\d{1,2}.+-/);
+                    if (!weekDesc) {
+                        // Successful date found, proceed...
+                        break;
+                    }
+                    else {
+                        _this.scheduleLines.shift(); // Remove the useless week description
+                        i--;
+                    }
+                }
+                else {
+                    _this.scheduleLines.shift(); // Remove the useless non-date line (date must be first)
+                    i--;
+                }
+            }
+            // If no date is found -> invalid input...
+            if (!eventDate)
+                return [];
+            // Remove the date line...
+            _this.scheduleLines.shift();
+            // List of events in current date (i.e. splits)
+            var events = [];
+            // While next line is not a date and not a time, check the next line...
+            while (true) {
+                var nextLine = _this.scheduleLines.shift();
+                if (nextLine) {
+                    // Check if next line is a date...
+                    if (Recognizer.getValidDate(nextLine.text)) {
+                        _this.scheduleLines.unshift(nextLine);
+                        return events;
+                    }
+                    // Get start time...
+                    var startTime = nextLine.text.match(/\d{2}:\d{2}/);
+                    if (startTime) {
+                        // Get end time...
+                        var continueIndex = startTime[0].length + (startTime.index || 0);
+                        nextLine.text = nextLine.text.substring(continueIndex);
+                        var endTime = nextLine.text.match(/\d{2}:\d{2}/);
+                        if (endTime) {
+                            // Get event title...
+                            var titleLine = _this.scheduleLines.shift();
+                            if (titleLine) {
+                                var summary = titleLine.text;
+                                events.push(Recognizer.createNewEvent(eventDate[0], startTime[0], endTime[0], summary));
+                            }
+                        }
+                    }
+                    else {
+                        // Check if the next line is a date (i.e. the start of next event) or time or something else
+                        var nextLine_1 = _this.scheduleLines.shift();
+                        if (nextLine_1) {
+                            if (Recognizer.getValidDate(nextLine_1.text))
+                                return events;
+                            var startTime_2 = nextLine_1.text.match(/\d{2}:\d{2}/);
+                            if (startTime_2) {
+                                // Get end time...normal 4 line..
+                                var continueIndex = startTime_2[0].length + (startTime_2.index || 0);
+                                nextLine_1.text = nextLine_1.text.substring(continueIndex);
+                                var endTime = nextLine_1.text.match(/\d{2}:\d{2}/);
+                                if (endTime) {
+                                    // Get event title...
+                                    var titleLine = _this.scheduleLines.shift();
+                                    if (titleLine) {
+                                        var summary = titleLine.text;
+                                        events.push(Recognizer.createNewEvent(eventDate[0], startTime_2[0], endTime[0], summary));
+                                    }
+                                }
+                            }
+                            // Possible RDO/ADO/Next Date/...
+                        }
+                    }
+                    return events; // Invalid (no next line | probably a day off).
+                }
+                // Get second line (has either a time or a week day)...
+                var secondLine = _this.scheduleLines.shift();
+                if (secondLine) {
+                    // Get start time...
+                    var startTime = secondLine.text.match(/\d{2}:\d{2}/);
+                    // If has time -> is Normal shift with the "Today" header (3 lines)/reg shift (schedule view)
+                    if (startTime) {
+                        // Get end time...
+                        var continueIndex = startTime[0].length + (startTime.index || 0);
+                        secondLine.text = secondLine.text.substring(continueIndex);
+                        var endTime = secondLine.text.match(/\d{2}:\d{2}/);
+                        // If has end time -> end time of Normal shift (3 lines)
+                        if (endTime) {
+                            // Get third line...
+                            var thirdLine = _this.scheduleLines.shift();
+                            // Get summary for Normal shift (3 lines)
+                            if (thirdLine) {
+                                // Get summary
+                                var summary = thirdLine.text;
+                                return [
+                                    Recognizer.createNewEvent(eventDate[0], startTime[0], endTime[0], summary),
+                                ];
+                            }
+                        }
+                        else {
+                            _this.scheduleLines.unshift(secondLine);
+                            return []; // Invalid (no end time).
+                        }
+                    }
+                    // This is possible RDO/ADO+/Split Shift (app)/Normal (4 lines)
+                    else {
+                        // Check 2 lines down to see if split shift or not
+                        var thirdLine = _this.scheduleLines.shift();
+                        if (thirdLine) {
+                            // Get start time...
+                            var startTime_3 = thirdLine.text.match(/\d{2}:\d{2}/);
+                            // This is either a normal shift (4 lines) or split (4 or more lines)
+                            if (startTime_3) {
+                                // Get end time...
+                                var continueIndex = startTime_3[0].length + (startTime_3.index || 0);
+                                thirdLine.text = thirdLine.text.substring(continueIndex);
+                                var endTime = thirdLine.text.match(/\d{2}:\d{2}/);
+                                // If has end time -> end time of Normal shift (4 lines)
+                                if (endTime) {
+                                    // Get third line...
+                                    var fourthLine = _this.scheduleLines.shift();
+                                    // Get summary for Normal shift (4 lines)
+                                    if (fourthLine) {
+                                        // Get summary
+                                        var summary = fourthLine.text;
+                                        var events_1 = [];
+                                        events_1.push(Recognizer.createNewEvent(eventDate[0], startTime_3[0], endTime[0], summary));
+                                        // Now check if there are more schedules (i.e. splits) until new date is reached/end of scheduleLines...
+                                        // Check line if it has a date...
+                                        while (true) {
+                                            var newLine = _this.scheduleLines.shift();
+                                            if (newLine) {
+                                                var newStartTime = newLine.text.match(/\d{2}:\d{2}/);
+                                                if (newStartTime) {
+                                                    // Get end time...
+                                                    var continueIndex_2 = startTime_3[0].length + (startTime_3.index || 0);
+                                                    newLine.text = newLine.text.substring(continueIndex_2);
+                                                    var newEndTime = newLine.text.match(/\d{2}:\d{2}/);
+                                                    if (newEndTime) {
+                                                        // Get third line...
+                                                        var summaryLine = _this.scheduleLines.shift();
+                                                        // Get summary for Normal shift (3 lines)
+                                                        if (summaryLine) {
+                                                            // Get summary
+                                                            var summary_2 = summaryLine.text;
+                                                            events_1.push(Recognizer.createNewEvent(eventDate[0], newStartTime[0], newEndTime[0], summary_2));
+                                                        }
+                                                        else
+                                                            break;
+                                                    }
+                                                    else
+                                                        break;
+                                                }
+                                                else {
+                                                    _this.scheduleLines.unshift(newLine);
+                                                    break;
+                                                }
+                                            }
+                                            else
+                                                break;
+                                        }
+                                        // Return all scheuldes as array.
+                                        return events_1;
+                                    }
+                                    else {
+                                        _this.scheduleLines.unshift(thirdLine);
+                                        _this.scheduleLines.unshift(secondLine);
+                                        return []; // Invalid (missing a summary).
+                                    }
+                                }
+                                else {
+                                    _this.scheduleLines.unshift(thirdLine);
+                                    _this.scheduleLines.unshift(secondLine);
+                                    return []; // Invalid (missing an end time).
+                                }
+                            }
+                            else {
+                                _this.scheduleLines.unshift(thirdLine);
+                                _this.scheduleLines.unshift(secondLine);
+                                return []; // Invalid (probably an ADO/RDO).
+                            }
+                        }
+                        else
+                            return []; // Invalid (no next line).
+                    }
+                }
+                else
+                    return []; // Invalid (no next line | probably a day off).
+                return [];
+            }
+        };
         this.addToCalendar = function (event) { return __awaiter(_this, void 0, void 0, function () {
             var res;
             return __generator(this, function (_a) {
@@ -395,6 +676,50 @@ var Recognizer = /** @class */ (function () {
             }
         });
     }); };
+    Recognizer.getValidDate = function (str) {
+        var date = str.toLowerCase().match(/[a-z]{2,9}.\d{1,2}.+20\d{1,2}/);
+        if (date) {
+            var weekDesc = str.toLowerCase().match(/[a-z]{2,9}.\d{1,2}.+-/);
+            return !weekDesc ? date : null;
+        }
+        else {
+            return null;
+        }
+    };
+    Recognizer.getEventTime = function (str) {
+        // Get start time...
+        var startTime = str.match(/\d{2}:\d{2}/);
+        if (startTime) {
+            // Get end time...
+            var continueIndex = startTime[0].length + (startTime.index || 0);
+            str = str.substring(continueIndex);
+            var endTime = str.match(/\d{2}:\d{2}/);
+            if (endTime) {
+                var eventTime = {
+                    start: startTime[0],
+                    end: endTime[0],
+                };
+                return eventTime;
+                // // Get event title...
+                // let titleLine = this.scheduleLines.shift();
+                // if (titleLine) {
+                // 	let summary = titleLine.text;
+                // 	events.push(
+                // 		Recognizer.createNewEvent(
+                // 			eventDate[0],
+                // 			startTime[0],
+                // 			endTime[0],
+                // 			summary
+                // 		)
+                // 	);
+                // }
+            }
+            else
+                return null;
+        }
+        else
+            return null;
+    };
     Recognizer.createNewEvent = function (date, startTime, endTime, summary) {
         // Remove invalid characters...
         date = date.replace(/[^a-zA-Z\d ]/, ' ');
