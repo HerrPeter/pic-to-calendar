@@ -1,6 +1,6 @@
 import Recognizer from './recognizer';
 
-const imageDir: string = process.argv.slice(2)[0] || __dirname + '/job_VIEW.jpg';
+const imageDir: string = process.argv.slice(2)[0] || __dirname + '/job.jpg';
 let image: Tesseract.RecognizeResult;
 let imageLines: Tesseract.Line[];
 
