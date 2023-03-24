@@ -1,11 +1,13 @@
 import Tesseract from 'tesseract.js';
 import { calendar_v3, google } from 'googleapis';
 import * as ics from 'ics';
-import { writeFileSync } from 'fs';
+import * as fs from 'fs';
 
 const CLIENT_ID = '';
 const CLIENT_SECRET = '';
 const API_KEY = '';
+
+const DIR_GENERATED_CALENDARS = `${__dirname}` + '/_generatedCalendars';
 
 interface Event {
 	summary?: string | null;
@@ -420,7 +422,7 @@ export default class Recognizer {
 			end: {
 				dateTime: endDate,
 			},
-			summary: summary.replace('\n', ''),
+			summary: summary.replace(/\n/g, ''), // Note: Must use regex to replace ALL instances
 		};
 	};
 
@@ -553,7 +555,14 @@ export default class Recognizer {
 				console.log(err);
 				return null;
 			} else if (value) {
-				writeFileSync(`${__dirname}/job-schedule.ics`, value);
+				// Make the directory for the generated calendar files if it does not already exist.
+				if (fs.existsSync(`${DIR_GENERATED_CALENDARS}`) == false) {
+					console.log('-- Making Calendar Dir --');
+					fs.mkdirSync(`${DIR_GENERATED_CALENDARS}`);
+				}
+
+				// Create the calendar file.
+				fs.writeFileSync(`${DIR_GENERATED_CALENDARS}` + '/job-schedule.ics', value);
 				return null;
 			}
 		});
