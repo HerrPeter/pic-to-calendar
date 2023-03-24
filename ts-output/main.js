@@ -1,4 +1,23 @@
 "use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -40,7 +59,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var recognizer_1 = __importDefault(require("./recognizer"));
-var imageDir = process.argv.slice(2)[0] || __dirname + '/job.jpg';
+var fs = __importStar(require("fs"));
+var DIR_IMAGE_SOURCE = "" + __dirname + '/_images';
+var imageDir = process.argv.slice(2)[0] || "" + DIR_IMAGE_SOURCE + '/job.jpg';
+// const imageDir: string = process.argv.slice(2)[0] || __dirname + '/_images/job.jpg';
 var image;
 var imageLines;
 var main = function () { return __awaiter(void 0, void 0, void 0, function () {
@@ -51,6 +73,12 @@ var main = function () { return __awaiter(void 0, void 0, void 0, function () {
                 // Attempt to auth via Google and add events automatically (COMING SOON)
                 // console.log('Authenticating...');
                 // myRec.authorize();
+                // Make sure the image folder exists.
+                if (fs.existsSync("" + imageDir) == false) {
+                    console.log('Error: No image source directory exists.');
+                    console.log("Solution: Create the folder dir: " + imageDir);
+                    return [2 /*return*/];
+                }
                 console.log('Extracting text from image (Please Wait) ...');
                 return [4 /*yield*/, recognizer_1.default.getText(imageDir)];
             case 1:

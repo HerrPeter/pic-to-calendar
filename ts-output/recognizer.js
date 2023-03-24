@@ -61,10 +61,11 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var tesseract_js_1 = __importDefault(require("tesseract.js"));
 var googleapis_1 = require("googleapis");
 var ics = __importStar(require("ics"));
-var fs_1 = require("fs");
+var fs = __importStar(require("fs"));
 var CLIENT_ID = '';
 var CLIENT_SECRET = '';
 var API_KEY = '';
+var DIR_GENERATED_CALENDARS = "" + __dirname + '/_generatedCalendars';
 var Recognizer = /** @class */ (function () {
     function Recognizer(textLines) {
         var _this = this;
@@ -456,7 +457,13 @@ var Recognizer = /** @class */ (function () {
                         return null;
                     }
                     else if (value) {
-                        fs_1.writeFileSync(__dirname + "/job-schedule.ics", value);
+                        // Make the directory for the generated calendar files if it does not already exist.
+                        if (fs.existsSync("" + DIR_GENERATED_CALENDARS) == false) {
+                            console.log('-- Making Calendar Dir --');
+                            fs.mkdirSync("" + DIR_GENERATED_CALENDARS);
+                        }
+                        // Create the calendar file.
+                        fs.writeFileSync("" + DIR_GENERATED_CALENDARS + '/job-schedule.ics', value);
                         return null;
                     }
                 });
@@ -549,7 +556,7 @@ var Recognizer = /** @class */ (function () {
             end: {
                 dateTime: endDate,
             },
-            summary: summary.replace('\n', ''),
+            summary: summary.replace(/\n/g, ''),
         };
     };
     /**
